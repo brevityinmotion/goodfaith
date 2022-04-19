@@ -6,25 +6,16 @@ import os
 import json
 from sys import stdin
 from os import isatty
+from pathlib import Path
 import pandas as pd
 
-from goodfaith.core.scope import *
+from core.scope import *
 
 #def quietmode(*args, **kwargs):
 #    """
 #    a function that does nothing
 #    """
 #    pass
-
-#def loadScope(programScope):
-#    programScope = dict(json.loads(programScope))
-#    return programScope
-
-def loadScope(scopeFile):
-    programData = open(scopeFile)
-        #programScope = dict(json.loads(programScope))
-    programScope = json.load(programData)
-    return programScope
 
 def main():
     # Initialize parser
@@ -42,11 +33,6 @@ def main():
     
  #   if args.quiet is True:
  #       print = quietmode
- 
-#    if args.inputfile:
-#        inputFile = args.inputfile
-#        if not os.path.exists(inputFile):
-#            print("Input file does not exist.")
 
     if args.outputdir:
         outputDir = args.outputdir
@@ -58,41 +44,39 @@ def main():
         quit()
     else:
         print("There is no bash input.")
-        scopeFile = args.scope
-        if not os.path.exists(scopeFile):
+        scopeFile = Path(args.scope)
+        #if not os.path.exists(scopeFile):
+        if not scopeFile.exists():
             print("Scope file does not exist.")
             quit()
         else:
             print("Loading program scope file.")
             programScope = loadScope(scopeFile)
-            print(programScope)
+            #print(programScope)
 
     # Check if there is any bash pipe input
     if not sys.stdin.isatty():
         if args.verbose is True:
             print("There is bash input.")
-        for line in sys.stdin:
-            sys.stdout.write(line)
+        dfAllURLs = pd.read_csv(sys.stdin, header=None, names=['url'], sep='\n')
+        #for line in sys.stdin:
+        #    sys.stdout.write(line)
     else:
         if args.quiet is False:
             print("There is no bash input.")
+        #if args.inputfile is not None:
         if args.inputfile is not None:
-            inputFile = args.inputfile
-            if not os.path.exists(inputFile):
+            inputFile = Path(args.inputfile)
+            #inputFile = args.inputfile
+        #    if not os.path.exists(inputFile):
+            if not inputFile.exists():
                 print("Input file does not exist.")
                 quit()
-            #print("Create dataframe here")
-            #dfAllURLs = pd.read_csv(inputFile, header=None, names=['url'], sep='\n')
-            #print(dfAllURLs[:10])
-    #is_pipe = not isatty(stdin.fileno())
-
-#    if args.outputdir:
-#        print("Displaying Output as: % s" % args.output)
+            else:
+                dfAllURLs = pd.read_csv(inputFile, header=None, names=['url'], sep='\n')
     
-
-    outputStatus = boundaryGuard(inputFile, outputDir, programScope)
-    print(outputStatus)
-    print("successful run")
+    statusMessage = boundaryGuard(dfAllURLs, outputDir, programScope)
+    print(statusMessage)
 
 if __name__ == "__main__":
     main()

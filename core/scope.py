@@ -4,11 +4,9 @@ import re
 import json
 import argparse
 import tldextract
+import sys
 from pandas.io.json import json_normalize
 from urllib.parse import urlparse
-
-#import brevityscope.parser
-#import brevityprogram.dynamodb
 
 def parseUrlRoot(urlvalue):
         try:
@@ -41,9 +39,6 @@ def parseUrlBase(urlvalue):
         return str(baseurl)
 
 def processEnrichURLs(programScope, dfAllURLs): # dataframe requires domain column
-    
-    # Retrieve the program information from database
-    #programPlatform, inviteType, listscopein, listscopeout, ScopeInURLs, ScopeInGithub, ScopeInWild, ScopeInGeneral, ScopeInIP, ScopeOutURLs, ScopeOutGithub, ScopeOutWild, ScopeOutGeneral, ScopeOutIP = getProgramInfo(programName)
     
     programName = programScope['program']
     
@@ -90,26 +85,20 @@ def processEnrichURLs(programScope, dfAllURLs): # dataframe requires domain colu
     return dfAllURLs
 
 #def processCrawl(programName, refinedBucketPath, inputBucketPath, presentationBucketPath, operationName, programInputBucketPath):
-def boundaryGuard(urlInputPath, urlOutputPath, programScope):
+def boundaryGuard(dfAllURLs, urlOutputPath, programScope):
     
     programName = programScope['program']
-    #extrapolateScope(programScope[list(programScope['scopein'])],programScope[list(programScope['scopeout'])])
-
-    # Retrieve the program information from database
-    #programPlatform, inviteType, listscopein, listscopeout, ScopeInURLs, ScopeInGithub, ScopeInWild, ScopeInGeneral, ScopeInIP, ScopeOutURLs, ScopeOutGithub, ScopeOutWild, ScopeOutGeneral, ScopeOutIP = getProgramInfo(programName)
- 
-    # Open the output file from the crawl. It is a raw list of URLs.
-    #csvPath = refinedBucketPath + programName + '/' + programName + '-urls-max.txt'
-    dfAllURLs = pd.read_csv(urlInputPath, header=None, names=['url'], sep='\n')
 
     dfAllURLs = processEnrichURLs(programScope, dfAllURLs)
 
     # File path that does not contain explicitly out-of-scope items
     storeModPathUrl = urlOutputPath + programName + '-urls-mod.txt'
     # File path that only contains explicitly in-scope urls
-    storeInPathUrl = urlOutputPath + programName + '-urls-in.txt'
+    storeInPathUrl = urlOutputPath + programName + '-urls-in-full.txt'
     # File path that only contains explicitly in-scope urls
-    storeBasePathUrl = urlOutputPath + programName + '-urls-base.txt'
+    storeBasePathUrl = urlOutputPath + programName + '-urls-in-base.txt'
+    storeOutPathUrl = urlOutputPath + programName + '-urls-out.txt'
+    detailedURLOutput = urlOutputPath + programName + '-details.csv'
 
     # Output URLs that are in-scope
     dfURLsIn = dfAllURLs[(dfAllURLs['scope'] == 'in') | (dfAllURLs['scope'] == 'wild')]
@@ -121,16 +110,21 @@ def boundaryGuard(urlInputPath, urlOutputPath, programScope):
     dfURLsMod = dfAllURLs[dfAllURLs['scope'] != 'out']
     dfURLsMod['url'].drop_duplicates().to_csv(storeModPathUrl, header=None, index=False, sep='\n')
     
-    # Output metrics within log
-    print('Length of all urls: ' + str(len(dfAllURLs)))
-    print('Length of mod urls: ' + str(len(dfURLsMod)))
-    print('Length of in-scope urls: ' + str(len(dfURLsIn)))
-
-    # Need to add a variable for this
-    #presentationPath = 's3://brevity-data/presentation/urls/' + programName + '-urls-info.csv'
-    #dfAllURLs.to_csv(presentationPath, columns=['url','domain','baseurl','program','scope'], index=False)
+    # Output URLs that are explicitly out-of-scope
+    dfURLsOut = dfAllURLs[dfAllURLs['scope'] == 'out']
+    dfURLsOut['url'].drop_duplicates().to_csv(storeOutPathUrl, header=None, index=False, sep='\n')
     
-    return 'URLs successfully published'
+    dfAllURLs.to_csv(detailedURLOutput, columns=['url','domain','baseurl','program','scope'], index=False)
+    
+    # Output metrics within log
+    print('Total number of urls: ' + str(len(dfAllURLs['url'].drop_duplicates())))
+    print('Number of urls not explicitly out-of-scope: ' + str(len(dfURLsMod['url'].drop_duplicates())))
+    print('Number of urls explicitly in-scope: ' + str(len(dfURLsIn['url'].drop_duplicates())))
+    print('Number of urls out-of-scope: ' + str(len(dfURLsOut['url'].drop_duplicates())))
+    print('Number of unique domains: ' + str(len(dfAllURLs['domain'].drop_duplicates())))
+    
+    dfURLsIn['url'].drop_duplicates().to_csv(sys.stdout, header=None, index=False, sep='\n')
+    return 'Successful Operation'
 
 def processSingleDomain(domainName):
     domainList = []
@@ -277,7 +271,7 @@ def extrapolateScope(programName, listscopein, listscopeout):
     ScopeOutIP = cleanupScopeIP(listscopeout)
     return ScopeInURLs, ScopeInGithub, ScopeInWild, ScopeInGeneral, ScopeInIP, ScopeOutURLs, ScopeOutGithub, ScopeOutWild, ScopeOutGeneral, ScopeOutIP
 
-#def loadScope(programScope):
-#    programScope = dict(json.loads(programScope))
-#    #programScope = json.loads(programScope)
-#    return programScope
+def loadScope(scopeFile):
+    programData = open(scopeFile)
+    programScope = json.load(programData)
+    return programScope

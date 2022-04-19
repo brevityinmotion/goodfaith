@@ -10,8 +10,14 @@ source ./v-env/bin/activate
 
 # Install packages
 pip install pandas
+pip install tldextract
+pip install re
+pip install json
+pip install argparse
+pip install regex
 mkdir goodfaith
-cp -r $HOME/environment/goodfaith/* ./goodfaith
+cd goodfaith
+cp -r $HOME/environment/goodfaith/* .
 
 deactivate
 
