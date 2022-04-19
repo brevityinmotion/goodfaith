@@ -1,0 +1,15 @@
+[
+  {
+    "program": "brevityinmotion",
+    "in_scope": [
+      "*.brevityinmotion.com",
+      "securitymarker.io",
+      "https://www.github.com/brevityinmotion"
+    ],
+    "out_of_scope": [
+      "icicles.io"
+    ],
+    "platform": "External",
+    "invite": "private"
+  }
+]

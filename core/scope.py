@@ -6,6 +6,7 @@ import argparse
 import tldextract
 from pandas.io.json import json_normalize
 from urllib.parse import urlparse
+
 #import brevityscope.parser
 #import brevityprogram.dynamodb
 
@@ -276,7 +277,7 @@ def extrapolateScope(programName, listscopein, listscopeout):
     ScopeOutIP = cleanupScopeIP(listscopeout)
     return ScopeInURLs, ScopeInGithub, ScopeInWild, ScopeInGeneral, ScopeInIP, ScopeOutURLs, ScopeOutGithub, ScopeOutWild, ScopeOutGeneral, ScopeOutIP
 
-def loadScope(programScope):
-    programScope = dict(json.loads(programScope))
-    #programScope = json.loads(programScope)
-    return programScope
+#def loadScope(programScope):
+#    programScope = dict(json.loads(programScope))
+#    #programScope = json.loads(programScope)
+#    return programScope
