@@ -7,6 +7,7 @@ import tldextract
 import sys
 from pandas.io.json import json_normalize
 from urllib.parse import urlparse
+from core.graph import *
 
 def parseUrlRoot(urlvalue):
         try:
@@ -84,7 +85,6 @@ def processEnrichURLs(programScope, dfAllURLs): # dataframe requires domain colu
     dfAllURLs['scope'] = np.select(conditions, values)
     return dfAllURLs
 
-#def processCrawl(programName, refinedBucketPath, inputBucketPath, presentationBucketPath, operationName, programInputBucketPath):
 def boundaryGuard(dfAllURLs, urlOutputPath, programScope):
     
     programName = programScope['program']
@@ -124,7 +124,10 @@ def boundaryGuard(dfAllURLs, urlOutputPath, programScope):
     print('Number of unique domains: ' + str(len(dfAllURLs['domain'].drop_duplicates())))
     
     dfURLsIn['url'].drop_duplicates().to_csv(sys.stdout, header=None, index=False, sep='\n')
-    return 'Successful Operation'
+    
+    generateGraph(outputDir,dfAllURLs,programName)
+    
+    return dfAllURLs
 
 def processSingleDomain(domainName):
     domainList = []

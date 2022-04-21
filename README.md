@@ -1,3 +1,3 @@
-# Coming soon: goodfaith
+# hack in goodfaith
 
 ### Stay within program scope

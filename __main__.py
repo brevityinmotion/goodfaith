@@ -28,6 +28,7 @@ def main():
     parser.add_argument("-c", "--config", help="The location of the configuration file.")
     parser.add_argument("-v", "--verbose", dest='quiet', action='store_false', help="Outputs runtime details, information, and debugging insight.")
     parser.add_argument('-q', "--quiet", dest='quiet', action='store_true', help='Quiet mode, no console output.')
+    parser.add_argument('-g', "--graph", dest='graph', action='store_true', help='Experimental - Generate a graph as output. Could take a couple minutes for generation.')
     # Read arguments from command line
     args = parser.parse_args()
     
@@ -56,8 +57,8 @@ def main():
 
     # Check if there is any bash pipe input
     if not sys.stdin.isatty():
-        if args.verbose is True:
-            print("There is bash input.")
+     #   if args.verbose is True:
+     #       print("There is bash input.")
         dfAllURLs = pd.read_csv(sys.stdin, header=None, names=['url'], sep='\n')
         #for line in sys.stdin:
         #    sys.stdout.write(line)
@@ -74,6 +75,9 @@ def main():
                 quit()
             else:
                 dfAllURLs = pd.read_csv(inputFile, header=None, names=['url'], sep='\n')
+                
+    if args.graph is True:
+        graphStatus = generateGraph(outputDir,dfAllURLs,programScope)
     
     statusMessage = boundaryGuard(dfAllURLs, outputDir, programScope)
     print(statusMessage)
