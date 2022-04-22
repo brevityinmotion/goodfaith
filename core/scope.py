@@ -85,20 +85,20 @@ def processEnrichURLs(programScope, dfAllURLs): # dataframe requires domain colu
     dfAllURLs['scope'] = np.select(conditions, values)
     return dfAllURLs
 
-def boundaryGuard(dfAllURLs, urlOutputPath, programScope):
+def boundaryGuard(dfAllURLs, outputDir, programScope, quietMode):
     
     programName = programScope['program']
 
     dfAllURLs = processEnrichURLs(programScope, dfAllURLs)
 
     # File path that does not contain explicitly out-of-scope items
-    storeModPathUrl = urlOutputPath + programName + '-urls-mod.txt'
+    storeModPathUrl = outputDir + programName + '-urls-mod.txt'
     # File path that only contains explicitly in-scope urls
-    storeInPathUrl = urlOutputPath + programName + '-urls-in-full.txt'
+    storeInPathUrl = outputDir + programName + '-urls-in-full.txt'
     # File path that only contains explicitly in-scope urls
-    storeBasePathUrl = urlOutputPath + programName + '-urls-in-base.txt'
-    storeOutPathUrl = urlOutputPath + programName + '-urls-out.txt'
-    detailedURLOutput = urlOutputPath + programName + '-details.csv'
+    storeBasePathUrl = outputDir + programName + '-urls-in-base.txt'
+    storeOutPathUrl = outputDir + programName + '-urls-out.txt'
+    detailedURLOutput = outputDir + programName + '-details.csv'
 
     # Output URLs that are in-scope
     dfURLsIn = dfAllURLs[(dfAllURLs['scope'] == 'in') | (dfAllURLs['scope'] == 'wild')]
@@ -115,17 +115,15 @@ def boundaryGuard(dfAllURLs, urlOutputPath, programScope):
     dfURLsOut['url'].drop_duplicates().to_csv(storeOutPathUrl, header=None, index=False, sep='\n')
     
     dfAllURLs.to_csv(detailedURLOutput, columns=['url','domain','baseurl','program','scope'], index=False)
-    
-    # Output metrics within log
-    print('Total number of urls: ' + str(len(dfAllURLs['url'].drop_duplicates())))
-    print('Number of urls not explicitly out-of-scope: ' + str(len(dfURLsMod['url'].drop_duplicates())))
-    print('Number of urls explicitly in-scope: ' + str(len(dfURLsIn['url'].drop_duplicates())))
-    print('Number of urls out-of-scope: ' + str(len(dfURLsOut['url'].drop_duplicates())))
-    print('Number of unique domains: ' + str(len(dfAllURLs['domain'].drop_duplicates())))
+    if not (quietMode):
+        # Output metrics within log
+        print('Total number of urls: ' + str(len(dfAllURLs['url'].drop_duplicates())))
+        print('Number of urls not explicitly out-of-scope: ' + str(len(dfURLsMod['url'].drop_duplicates())))
+        print('Number of urls explicitly in-scope: ' + str(len(dfURLsIn['url'].drop_duplicates())))
+        print('Number of urls out-of-scope: ' + str(len(dfURLsOut['url'].drop_duplicates())))
+        print('Number of unique domains: ' + str(len(dfAllURLs['domain'].drop_duplicates())))
     
     dfURLsIn['url'].drop_duplicates().to_csv(sys.stdout, header=None, index=False, sep='\n')
-    
-    generateGraph(outputDir,dfAllURLs,programName)
     
     return dfAllURLs
 

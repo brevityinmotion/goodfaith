@@ -2,19 +2,25 @@
 import networkx as nx
 import pandas as pd
 
-from bokeh.io import output_notebook, show, save
+from bokeh.io import output_notebook, output_file, show, save
 from bokeh.models import Range1d, Circle, ColumnDataSource, MultiLine
 from bokeh.plotting import figure
 from bokeh.plotting import from_networkx
+
+from bokeh.core.validation import silence
+from bokeh.core.validation.warnings import EMPTY_LAYOUT
 
 # https://docs.bokeh.org/en/latest/docs/reference/palettes.html
 from bokeh.palettes import Blues8, Reds8, Purples8, Oranges8, Viridis8, Spectral8, Turbo256, Bokeh, inferno
 from bokeh.transform import linear_cmap
 from networkx.algorithms import community
 
-def generateGraph(outputDir,dfGraphData,programName):
+#silence(EMPTY_LAYOUT, True)
+
+def generateGraph(outputDir,dfGraphData,programScope):
 
     try:
+        programName = programScope['program']
         # Load program data
         fileName = programName + '-graph.html'
         graphOutputPath = outputDir + fileName
@@ -44,16 +50,13 @@ def generateGraph(outputDir,dfGraphData,programName):
 
         # Adapted from https://melaniewalsh.github.io/Intro-Cultural-Analytics/Network-Analysis/Making-Network-Viz-with-Bokeh.html
 
-        #Choose a title!
-        title = programName
-
         #Establish which categories will appear when hovering over each node
         HOVER_TOOLTIPS = [("baseurl", "@index")]
 
         #Create a plot — set dimensions, toolbar, and title
         plot = figure(tooltips = HOVER_TOOLTIPS,
             tools="pan,wheel_zoom,save,reset", active_scroll='wheel_zoom',
-            x_range=Range1d(-10.1, 10.1), y_range=Range1d(-10.1, 10.1), title=title)
+            x_range=Range1d(-10.1, 10.1), y_range=Range1d(-10.1, 10.1), title=programName)
 
         #Create a network graph object with spring layout
         network_graph = from_networkx(G2, nx.spring_layout, scale=10, center=(0, 0))
@@ -74,16 +77,10 @@ def generateGraph(outputDir,dfGraphData,programName):
         #Add network graph to the plot
         plot.renderers.append(network_graph)
         plot.sizing_mode = 'scale_both'
-
+        #output_file = fileName
+        output_file = fileName
         save(plot, filename=graphOutputPath)
-        return "Graph creation success."
+        return "Graph successfully generated."
         
     except:
         return "Graph creation failed."
-
-#outputDir = '/content/drive/MyDrive/brevityrecon/'
-#fileName = 'outputbrevityinmotion-details.csv'
-#inputFile = outputDir + fileName
-#dfGraphData = pd.read_csv(inputFile)
-#programName = 'brevityinmotion'
-#generateGraph(outputDir,dfGraphData,programName)

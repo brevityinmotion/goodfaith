@@ -1,0 +1,7 @@
+pandas
+tldextract
+argparse
+regex
+networkx
+bokeh
+scipy

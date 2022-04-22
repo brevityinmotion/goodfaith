@@ -13,6 +13,17 @@ from core.scope import *
 
 def main():
     
+    def showBanner():
+        print('''
+ _                 _                    _                             _               _     
+| |               | |            o     | |                        |  | |       o     | |    
+| |     __,   __  | |              _|_ | |       __,  __   __   __|  | |  __,    _|_ | |    
+|/ \   /  |  /    |/_)   |  |  |_|  |  |/ \     /  | /  \_/  \_/  |  |/  /  |  |  |  |/ \   
+|   |_/\_/|_/\___/| \_/   \/ \/  |_/|_/|   |_/  \_/|/\__/ \__/ \_/|_/|__/\_/|_/|_/|_/|   |_/
+                                                  /|                 |\                     
+                                                  \|                 |/                     
+    ''')
+    
     # Initialize parser
     parser = argparse.ArgumentParser(description='Check for scope.')
  
@@ -27,27 +38,22 @@ def main():
     # Read arguments from command line
     args = parser.parse_args()
     
-    def showBanner():
-        print('''
- _                 _                    _                             _               _     
-| |               | |            o     | |                        |  | |       o     | |    
-| |     __,   __  | |              _|_ | |       __,  __   __   __|  | |  __,    _|_ | |    
-|/ \   /  |  /    |/_)   |  |  |_|  |  |/ \     /  | /  \_/  \_/  |  |/  /  |  |  |  |/ \   
-|   |_/\_/|_/\___/| \_/   \/ \/  |_/|_/|   |_/  \_/|/\__/ \__/ \_/|_/|__/\_/|_/|_/|_/|   |_/
-                                                  /|                 |\                     
-                                                  \|                 |/                     
-    ''')
-    
-    # Check whether console output should be disabled.
+ #   if args.quiet is True:
+ #       print = quietmode
     if args.quiet:
         quietMode = True
     else:
         quietMode = False
-        
-    if not (quietMode):
-        showBanner()
 
-    # Check if scope is provided
+    if args.outputdir:
+        outputDir = args.outputdir
+        if not os.path.exists(outputDir): # Check if directory exists
+            try:
+                os.mkdir(outputDir) # create a new directory
+            except:
+                if (quietMode):
+                    print('Failed to create output directory.')
+
     if args.scope is None:
         if not (quietMode):
             print("Scope input file is required.")
@@ -62,22 +68,12 @@ def main():
         else:
             if not (quietMode):
                 print("Loading program scope file.")
-            try:
-                programScope = loadScope(scopeFile)
-            except:
-                if not (quietMode):
-                    print('Failed to load project scope.')
-                quit()
-
-    # Validate output directory
-    if args.outputdir:
-        outputDir = args.outputdir
-        if not os.path.exists(outputDir): # Check if directory exists
-            try:
-                os.mkdir(outputDir) # create a new directory
-            except:
-                if (quietMode):
-                    print('Failed to create output directory.')
+                try:
+                    programScope = loadScope(scopeFile)
+                except:
+                    if not (quietMode):
+                        print('Failed to load project scope.')
+                    quit()
 
     # Check if there is any bash pipe input
     if not sys.stdin.isatty():
@@ -91,6 +87,8 @@ def main():
     else:
         if args.inputfile is not None:
             inputFile = Path(args.inputfile)
+            #inputFile = args.inputfile
+        #    if not os.path.exists(inputFile):
             if not inputFile.exists():
                 print("Input file does not exist.")
                 quit()
@@ -100,22 +98,15 @@ def main():
                 except:
                     if not (quietMode):
                         print('Input file failed to load.')
-    
-    dfUpdatedURLs = boundaryGuard(dfAllURLs, outputDir, programScope, quietMode)
-    if not (quietMode):
-        print('Scope processing completed.')
+        
+    statusMessage = boundaryGuard(dfAllURLs, outputDir, programScope)
+    print(statusMessage)
     
     # Need to run graph after data analysis
     if args.graph is True:
-        try:
-            if not (quietMode):
-                print('Generating graph. This could take a couple minutes.')
-            graphStatus = generateGraph(outputDir,dfUpdatedURLs,programScope)
-            if not (quietMode):
-                print(graphStatus)
-        except:
-            if not (quietMode):
-                print('Graph failed to generate.')
+        graphStatus = generateGraph(outputDir,dfAllURLs,programScope)
+        print(graphStatus)
+
 
 if __name__ == "__main__":
     main()
