@@ -5,12 +5,15 @@ import json
 import argparse
 import tldextract
 import sys
+import goodfaith.core.graph
+import goodfaith.core.scope
 from pandas.io.json import json_normalize
 from urllib.parse import urlparse
-from core.graph import *
 
 def parseUrlRoot(urlvalue):
         try:
+            urlvalue = urlvalue.lstrip('[')
+            urlvalue = urlvalue.rstrip(']')
             cleanurl = urlparse(urlvalue)#.netloc
             cleanurl = cleanurl.hostname
             return str(cleanurl)
@@ -53,7 +56,7 @@ def processEnrichURLs(programScope, dfAllURLs): # dataframe requires domain colu
     mapperIn = {True: 'in', False: 'other'}  # in = within the defined scope
     mapperOut = {True: 'out', False: 'in'} # out = explicitly out of scope
     mapperWild = {True: 'wild', False: 'out'} # wild - within the wildcard scope
-     # other = not in scope but not explicitly excluded
+    # other = not in scope but not explicitly excluded
     
     # This checks to determine whether a url is explicitly defined as out-of-scope
     dfAllURLs['scopeOut'] = dfAllURLs.domain.str.lower().isin([x.lower() for x in ScopeOutGeneral]).map(mapperOut)
@@ -115,7 +118,7 @@ def boundaryGuard(dfAllURLs, outputDir, programScope, quietMode):
     dfURLsOut['url'].drop_duplicates().to_csv(storeOutPathUrl, header=None, index=False, sep='\n')
     
     dfAllURLs.to_csv(detailedURLOutput, columns=['url','domain','baseurl','program','scope'], index=False)
-    if not (quietMode):
+    if quietMode is False:
         # Output metrics within log
         print('Total number of urls: ' + str(len(dfAllURLs['url'].drop_duplicates())))
         print('Number of urls not explicitly out-of-scope: ' + str(len(dfURLsMod['url'].drop_duplicates())))
@@ -152,23 +155,6 @@ def processSingleDomain(domainName):
             domainList.append(rootDomain)
             subLength = subLength - 1
     return domainList
-
-def processBulkDomains(dfAmass):
-    listDomains = []
-    try:
-        listDomains = dfAmass['subdomain'].unique().tolist()
-    except:
-        print('No subdomain column')
-    try:
-        listDomains += dfAmass['domain'].unique().tolist()
-    except:
-        print('No domain column')
-    tempDomains = []
-    for val in listDomains: 
-        tempDomains = processSingleDomain(val)
-        listDomains = listDomains + tempDomains
-    setDomains = set(listDomains)
-    return setDomains
 
 def cleanupScopeGithub(dfIn):
     matchString = 'github.com'

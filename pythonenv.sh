@@ -28,3 +28,10 @@ chmod 777 -R $HOME/environment/virtualenv/
 
 
 #  ./__main__.py -s $HOME/environment/virtualenv/samples/scope.json -i $HOME/environment/virtualenv/samples/brevityinmotion-urls-max.txt -o $HOME/environment/virtualenv/output
+
+# python3 -m pip install --upgrade build
+
+
+# python3 -m pip install --upgrade twine
+
+# python3 -m twine upload --repository testpypi dist/*
