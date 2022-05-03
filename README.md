@@ -27,7 +27,7 @@ The usage of goodfaith will help researchers avoid generating traffic against ex
 
 This tool solves these major barriers towards scalable automation via the following features.
 * goodfaith can be imported into an existing project or utilized as a standalone bash script.
-* goodfaith can be sandwhiched into bug bounty one-liner chains to maintain scope throughout a workflow.
+* goodfaith can be chained into bug bounty one-liners to maintain scope throughout a workflow.
 * goodfaith removes explicitly out-of-scope targets from a workflow.
 
 ### Installation
@@ -40,7 +40,7 @@ pip3 install goodfaith
 
 Example usage with input file:
 
-`goodfaith -s $HOME/goodfaith/samples/scope.json -i $HOME/goodfaith/samples/brevityinmotion-urls-max.txt -o $HOME/goodfaith/output --graph`
+`goodfaith -s $HOME/goodfaith/samples/scope.json -i $HOME/goodfaith/samples/brevityinmotion-urls-max.txt -o $HOME/goodfaith/output`
 
 Example usage with stdin and bash piping:
 
