@@ -4,7 +4,7 @@ lambdas/build*
 tools/nuclei/*
 tools/*
 unused/*
-*.~c9_invoke*
+*c9_invoke*
 testinstall.sh
 pythonenv.sh
 

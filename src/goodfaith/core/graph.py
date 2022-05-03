@@ -15,8 +15,6 @@ from bokeh.palettes import Blues8, Reds8, Purples8, Oranges8, Viridis8, Spectral
 from bokeh.transform import linear_cmap
 from networkx.algorithms import community
 
-#silence(EMPTY_LAYOUT, True)
-
 def generateGraph(outputDir,dfGraphData,programScope):
 
     try:
@@ -67,7 +65,7 @@ def generateGraph(outputDir,dfGraphData,programScope):
         color_palette = Turbo256
 
         #Set node sizes and colors according to node degree (color as category from attribute)
-        network_graph.node_renderer.glyph = Circle(size=15, fill_color=color_by_this_attribute)
+        network_graph.node_renderer.glyph = Circle(size=10, fill_color=color_by_this_attribute)
         #Set node size and color
         #network_graph.node_renderer.glyph = Circle(size=degree, fill_color='skyblue')
 

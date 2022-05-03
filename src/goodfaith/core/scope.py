@@ -20,7 +20,7 @@ def parseUrlRoot(urlvalue):
         except:
             # If urlparse due to weird characters like "[", utilize generic url to avoid downstream issues.
             # TODO: I'm sure there is probably a better way to handle this.
-            urlvalue = "https://icicles.io"
+            urlvalue = "failed"
             cleanurl = urlparse(urlvalue)#.netloc
             cleanurl = cleanurl.hostname
             return str(cleanurl)
@@ -28,6 +28,8 @@ def parseUrlRoot(urlvalue):
 def parseUrlBase(urlvalue):
     # Normalize URLs to avoid duplicate urls if it is http or https and has standard ports. Was discovering duplicate urls with and without port.
     try:
+        urlvalue = urlvalue.lstrip('[')
+        urlvalue = urlvalue.rstrip(']')
         baseurl = urlparse(urlvalue)
         if (baseurl.port == 443 or baseurl.port == 80):
             baseurl = baseurl.scheme + '://' + baseurl.hostname + baseurl.path
@@ -35,9 +37,10 @@ def parseUrlBase(urlvalue):
             baseurl = baseurl.scheme + '://' + baseurl.netloc + baseurl.path
         return str(baseurl)
     except:
-        # If urlparse due to weird characters like "[", utilize generic url to avoid downstream issues.
+        # If urlparse fails, utilize generic url to avoid downstream issues.
         # TODO: I'm sure there is probably a better way to handle this.
-        urlvalue = "https://icicles.io"
+        
+        urlvalue = "failed"
         baseurl = urlparse(urlvalue)
         baseurl = baseurl.scheme + '://' + baseurl.hostname + baseurl.path
         return str(baseurl)
@@ -51,6 +54,10 @@ def processEnrichURLs(programScope, dfAllURLs): # dataframe requires domain colu
     dfAllURLs['domain'] = dfAllURLs['url'].apply(parseUrlRoot)
     dfAllURLs['baseurl'] = dfAllURLs['url'].apply(parseUrlBase)
     dfAllURLs['program'] = programName
+    
+    # Remove rows that failed cleanup (parseUrlRoot and parseUrlBase)
+    dfAllURLs = dfAllURLs[dfAllURLs.domain != 'failed']
+    dfAllURLs = dfAllURLs[dfAllURLs.baseurl != 'failed']
     
     # Scope mapper
     mapperIn = {True: 'in', False: 'other'}  # in = within the defined scope
