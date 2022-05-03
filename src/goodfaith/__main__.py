@@ -83,11 +83,13 @@ def main():
             except:
                 if quietMode is False:
                     print('Failed to create output directory.')
+    else:
+        outputDir = 'NoOutput'
 
     # Check if there is any bash pipe input
     if not sys.stdin.isatty():
         try:
-            dfAllURLs = pd.read_csv(sys.stdin, header=None, names=['url'], sep='\n')
+            dfAllURLs = pd.read_csv(sys.stdin, header=None, names=['url'], engine='python')
         except:
             if quietMode is False:
                 print('Failed to load standard input.')
@@ -101,10 +103,11 @@ def main():
                 quit()
             else:
                 try:
-                    dfAllURLs = pd.read_csv(inputFile, header=None, names=['url'], sep='\n')
+                    dfAllURLs = pd.read_csv(inputFile, header=None, names=['url'], engine='python')
                 except:
                     if not (quietMode):
                         print('Input file failed to load.')
+                    quit()
     
     dfUpdatedURLs = goodfaith.core.scope.boundaryGuard(dfAllURLs, outputDir, programScope, quietMode)
     if quietMode is False:

@@ -4,6 +4,8 @@
 
 ### Hack within program scope using goodfaith.
 
+![goodfaith](img/console.png)
+
 ## Why goodfaith?
 Recon automation continues to increase in popularity. Automation frameworks range anywhere from a complex, scalable cloud environment to a one-liner bash script. Both approaches are powerful, yet the techniques result in massive amounts of output.
 
@@ -44,6 +46,8 @@ Example usage with stdin and bash piping:
 
 `cat urllist.csv | goodfaith -s $HOME/goodfaith/samples/scope.json --quiet | tee scopedurls.txt`
 
+`cat urls.txt | goodfaith -s scopefile.json | httpx`
+
 __Required arguments__:
 * __-s, --scope__ : A JSON formatted scope file is required in order to process the urls. This argument requires the path and filename.
 
@@ -76,6 +80,8 @@ __Optional arguments__:
 __Experimental arguments__:
 * __-g, --graph__ : Output the information into a html graph file to the output directory. This functionality is implemented but needs to be tuned and enhanced. Future intent would be to provide an interactive file to explore and visualize patterns, scope status, and program correlations. It is also currently slow to generate.
 
+![graph](img/urlgraph.png)
+
 __Future arguments__:
 * __-c, --config__ : The parameters will be supported in the future via a config file to limit argument inputs.
 
@@ -93,11 +99,15 @@ __Note__ - when using console mode or bash pipes, __the in_scope and wild URLs a
 
 ### Output Files
 
-* {output folder path}/{program}-urls-other.txt' - This file includes the urls not explicitly in or out of scope.
-* {output folder path}/{program}-urls-in-full.txt' - This file includes the full URL for in-scope URLs.
-* {output folder path}/{program}-urls-in-base.txt' - This file includes the base URL for in-scope URLs. The base path is useful for brute-forcing varying directory paths without the parameters.
-* {output folder path}/{program}-urls-out.txt' - This file includes the out-of-scope URLs.
-* {output folder path}/{program}-details.csv' - This csv file includes all of the parsed and scope status data and can be beneficial for further analysis, searching, and filtering.
+* {output folder path}/{program}-urls-other.txt - This file includes the urls not explicitly in or out of scope.
+* {output folder path}/{program}-urls-in-full.txt - This file includes the full URL for in-scope URLs.
+* {output folder path}/{program}-urls-in-base.txt - This file includes the base URL for in-scope URLs. The base path is useful for brute-forcing varying directory paths without the parameters.
+* {output folder path}/{program}-urls-out.txt - This file includes the out-of-scope URLs.
+* {output folder path}/{program}-details.csv - This csv file includes all of the parsed and scope status data and can be beneficial for further analysis, searching, and filtering.
+* {output folder path}/{program}-stats.txt - This file provides an output summary of the processing statistics.
+* {output folder path}/{program}-graph.html - This is the graph visualization output which is still in experimental mode.
+
+![stats](img/stats.png)
 
 ### Limitations
 

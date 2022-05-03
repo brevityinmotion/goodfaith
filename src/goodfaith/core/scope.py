@@ -109,31 +109,51 @@ def boundaryGuard(dfAllURLs, outputDir, programScope, quietMode):
     storeBasePathUrl = outputDir + programName + '-urls-in-base.txt'
     storeOutPathUrl = outputDir + programName + '-urls-out.txt'
     detailedURLOutput = outputDir + programName + '-details.csv'
-
-    # Output URLs that are in-scope
+    statsFile = outputDir + programName + '-stats.txt'
+    
+    # Create DataFrames containing sorted URLs
     dfURLsIn = dfAllURLs[(dfAllURLs['scope'] == 'in') | (dfAllURLs['scope'] == 'wild')]
-    dfURLsIn['url'].drop_duplicates().to_csv(storeInPathUrl, header=None, index=False, sep='\n')
-    # This only outputs the base URL so that it can be used for fuzzing
-    dfURLsIn['baseurl'].drop_duplicates().to_csv(storeBasePathUrl, header=None, index=False, sep='\n')
-    
-    # Output URLs that are not explicitly out-of-scope
     dfURLsMod = dfAllURLs[dfAllURLs['scope'] != 'out']
-    dfURLsMod['url'].drop_duplicates().to_csv(storeModPathUrl, header=None, index=False, sep='\n')
-    
-    # Output URLs that are explicitly out-of-scope
     dfURLsOut = dfAllURLs[dfAllURLs['scope'] == 'out']
-    dfURLsOut['url'].drop_duplicates().to_csv(storeOutPathUrl, header=None, index=False, sep='\n')
     
-    dfAllURLs.to_csv(detailedURLOutput, columns=['url','domain','baseurl','program','scope'], index=False)
+    if (outputDir != 'NoOutput'):
+        # Output URLs that are in-scope
+        dfURLsIn['url'].drop_duplicates().to_csv(storeInPathUrl, header=None, index=False, sep='\n')
+        # This only outputs the base URL so that it can be used for fuzzing
+        dfURLsIn['baseurl'].drop_duplicates().to_csv(storeBasePathUrl, header=None, index=False, sep='\n')
+        # Output URLs that are not explicitly out-of-scope
+        dfURLsMod['url'].drop_duplicates().to_csv(storeModPathUrl, header=None, index=False, sep='\n')
+        # Output URLs that are explicitly out-of-scope
+        dfURLsOut['url'].drop_duplicates().to_csv(storeOutPathUrl, header=None, index=False, sep='\n')
+        dfAllURLs.to_csv(detailedURLOutput, columns=['url','domain','baseurl','program','scope'], index=False)
+
+        try:
+            with open(statsFile, "a") as file_object:
+                file_object.write('Total number of urls: ' + str(len(dfAllURLs['url'].drop_duplicates())))
+                file_object.write('\n')
+                file_object.write('Number of urls not explicitly out-of-scope: ' + str(len(dfURLsMod['url'].drop_duplicates())))
+                file_object.write('\n')
+                file_object.write('Number of urls in-scope: ' + str(len(dfURLsIn['url'].drop_duplicates())))
+                file_object.write('\n')
+                file_object.write('Number of urls out-of-scope: ' + str(len(dfURLsOut['url'].drop_duplicates())))
+                file_object.write('\n')
+                file_object.write('Number of unique domains: ' + str(len(dfAllURLs['domain'].drop_duplicates())))
+                file_object.write('\n')
+        except:
+            if quietMode is False:
+                print('Failed to write stats file.')
+    
+    # Output the URLs to console/stdout
+    dfURLsIn['url'].drop_duplicates().to_csv(sys.stdout, header=None, index=False, sep='\n')
+    
     if quietMode is False:
-        # Output metrics within log
+        # Output metrics within console
+        print('\n')
         print('Total number of urls: ' + str(len(dfAllURLs['url'].drop_duplicates())))
         print('Number of urls not explicitly out-of-scope: ' + str(len(dfURLsMod['url'].drop_duplicates())))
         print('Number of urls in-scope: ' + str(len(dfURLsIn['url'].drop_duplicates())))
         print('Number of urls out-of-scope: ' + str(len(dfURLsOut['url'].drop_duplicates())))
         print('Number of unique domains: ' + str(len(dfAllURLs['domain'].drop_duplicates())))
-    
-    dfURLsIn['url'].drop_duplicates().to_csv(sys.stdout, header=None, index=False, sep='\n')
     
     return dfAllURLs
 
