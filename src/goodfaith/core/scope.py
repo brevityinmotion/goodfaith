@@ -95,7 +95,7 @@ def boundaryGuard(dfAllURLs, outputDir, programScope, quietMode):
     dfAllURLs = processEnrichURLs(programScope, dfAllURLs)
 
     # File path that does not contain explicitly out-of-scope items
-    storeModPathUrl = outputDir + programName + '-urls-mod.txt'
+    storeModPathUrl = outputDir + programName + '-urls-other.txt'
     # File path that only contains explicitly in-scope urls
     storeInPathUrl = outputDir + programName + '-urls-in-full.txt'
     # File path that only contains explicitly in-scope urls
@@ -122,7 +122,7 @@ def boundaryGuard(dfAllURLs, outputDir, programScope, quietMode):
         # Output metrics within log
         print('Total number of urls: ' + str(len(dfAllURLs['url'].drop_duplicates())))
         print('Number of urls not explicitly out-of-scope: ' + str(len(dfURLsMod['url'].drop_duplicates())))
-        print('Number of urls explicitly in-scope: ' + str(len(dfURLsIn['url'].drop_duplicates())))
+        print('Number of urls in-scope: ' + str(len(dfURLsIn['url'].drop_duplicates())))
         print('Number of urls out-of-scope: ' + str(len(dfURLsOut['url'].drop_duplicates())))
         print('Number of unique domains: ' + str(len(dfAllURLs['domain'].drop_duplicates())))
     

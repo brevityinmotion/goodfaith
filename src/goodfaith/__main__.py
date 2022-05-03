@@ -14,16 +14,19 @@ import goodfaith.core.graph
 def main():
     
     # Initialize parser
-    parser = argparse.ArgumentParser(description='Check for scope.')
+    parser = argparse.ArgumentParser(
+        prog='goodfaith',
+        description='Check for scope.',
+        epilog='hack with goodfaith')
  
     # Adding optional argument
-    parser.add_argument("-s", "--scope", help="The location of the JSON scope file.")
-    parser.add_argument("-i", "--inputfile", dest='inputfile', help="The location of the URL input file.")
-    parser.add_argument("-o", "--outputdir", dest='outputdir', help="The location of the output directory.")
-    parser.add_argument("-c", "--config", help="The location of the configuration file.")
-    parser.add_argument("-v", "--verbose", dest='quiet', action='store_false', help="Outputs runtime details, information, and debugging insight.")
-    parser.add_argument('-q', "--quiet", dest='quiet', action='store_true', help='Quiet mode, essential output only.')
-    parser.add_argument('-g', "--graph", dest='graph', action='store_true', help='Experimental - Generate a graph as output. Could take a couple minutes for generation.')
+    parser.add_argument("-s", "--scope", help="Required argument - A JSON formatted scope file is required in order to process the urls. This argument requires the path and filename.", required=True)
+    parser.add_argument("-i", "--inputfile", dest='inputfile', help="Optional argument - The location and filename of the URL input file.")
+    parser.add_argument("-o", "--outputdir", dest='outputdir', help="Optional argument - The location of the output directory. If the folder does not already exist, it will be created. If no output directory is provided, no output files will be generated and the only output will be printed to the console via stdout.")
+ #   parser.add_argument("-c", "--config", help="The parameters will be supported in the future via a config file to limit argument inputs.")
+    parser.add_argument("-v", "--verbose", dest='quiet', action='store_false', help="Optional argument - Output additional details to the console (statistics, errors, and progress). This mode should not be used if passing the stdout to another tool and is best utilized for troubleshooting.")
+    parser.add_argument('-q', "--quiet", dest='quiet', action='store_true', help='Optional argument - Only output the URLs to the console/stdout to support bash piping. This mode already defaults to true if verbose is not set although can be explicitly defined.')
+    parser.add_argument('-g', "--graph", dest='graph', action='store_true', help='Experimental optional argument - Output the information into a html graph file to the output directory. This functionality is implemented but needs to be tuned and enhanced. Future intent would be to provide an interactive file to explore and visualize patterns, scope status, and program correlations. It is also currently slow to generate.')
     # Read arguments from command line
     args = parser.parse_args()
     
