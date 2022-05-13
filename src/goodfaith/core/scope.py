@@ -5,6 +5,8 @@ import json
 import argparse
 import tldextract
 import sys
+import urllib
+import ast
 import goodfaith.core.graph
 import goodfaith.core.scope
 from pandas.io.json import json_normalize
@@ -289,3 +291,74 @@ def loadScope(scopeFile):
     programData = open(scopeFile)
     programScope = json.load(programData)
     return programScope
+
+def parseScope(inputScope):
+    targetData = []
+    if not inputScope:
+        targetData.append('failed')
+        return targetData
+    smallAll = str(inputScope)[1:-1]
+    scopeLength = len(inputScope)
+    smallData = ast.literal_eval(smallAll)
+
+    if (scopeLength > 1):
+        for item in smallData:
+            if item.get('target') is not None:
+                targetData.append(item.get('target'))
+            if item.get('asset_identifier') is not None:
+                targetData.append(item.get('asset_identifier'))
+        return targetData
+    else:
+        if smallData.get('target') is not None:
+            targetData.append(smallData.get('target'))
+        if smallData.get('asset_identifier') is not None:
+            targetData.append(smallData.get('asset_identifier'))
+        return targetData
+
+# Retrieve Bulk Programs
+def bulkLoad(bulkPlatform):
+    if (bulkPlatform == 'bugcrowd'):
+        filePath = 'https://raw.githubusercontent.com/arkadiyt/bounty-targets-data/master/data/bugcrowd_data.json'
+    if (bulkPlatform == 'hackerone'):
+        filePath = 'https://raw.githubusercontent.com/arkadiyt/bounty-targets-data/master/data/hackerone_data.json'
+    if (bulkPlatform == 'intigriti'):
+        filePath = 'https://raw.githubusercontent.com/arkadiyt/bounty-targets-data/master/data/intigriti_data.json'
+    if (bulkPlatform == 'yeswehack'):
+        filePath = 'https://raw.githubusercontent.com/arkadiyt/bounty-targets-data/master/data/yeswehack_data.json'
+    if (bulkPlatform == 'federacy'):
+        filePath = 'https://raw.githubusercontent.com/arkadiyt/bounty-targets-data/master/data/federacy_data.json'
+    if (bulkPlatform == 'hackenproof'):
+        filePath = 'https://raw.githubusercontent.com/arkadiyt/bounty-targets-data/master/data/hackenproof_data.json'
+
+    with urllib.request.urlopen(filePath) as url:
+        data = json.loads(url.read().decode())
+
+    # Count the scopes processed
+    counter = 0
+    for scope in data:
+        counter = counter + 1
+        # Normalize the JSON keys
+        if (bulkPlatform == 'bugcrowd'):
+            scope['program'] = scope['name']
+        if (bulkPlatform == 'hackerone'):
+            scope['program'] = scope['handle']
+        if (bulkPlatform == 'intigriti'):
+            scope['program'] = scope['company_handle']
+        if (bulkPlatform == 'yeswehack'):
+            scope['program'] = scope['name']
+        if (bulkPlatform == 'federacy'):
+            scope['program'] = scope['name']
+        if (bulkPlatform == 'hackenproof'):
+            scope['program'] = scope['name']
+
+    dfPublicPrograms = pd.json_normalize(data)
+    dfPublicPrograms['platform'] = bulkPlatform
+    dfPublicPrograms['invite'] = 'public'
+    dfPublicPrograms['in_scope'] = dfPublicPrograms['targets.in_scope'].apply(parseScope)
+    dfPublicPrograms['out_of_scope'] = dfPublicPrograms['targets.out_of_scope'].apply(parseScope)
+    # Make a copy of DataFrame to only include relevant columns.
+    # Can always add additional columns in the future.
+    dfBulkLoad = dfPublicPrograms[['program','in_scope','out_of_scope','platform','invite']].copy()
+    platformJSON = dfBulkLoad.to_json(orient='records')
+    platformData = json.loads(platformJSON)
+    return platformData, counter

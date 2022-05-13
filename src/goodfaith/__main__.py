@@ -27,6 +27,7 @@ def main():
     parser.add_argument("-v", "--verbose", dest='quiet', action='store_false', help="Optional argument - Output additional details to the console (statistics, errors, and progress). This mode should not be used if passing the stdout to another tool and is best utilized for troubleshooting.")
     parser.add_argument('-q', "--quiet", dest='quiet', action='store_true', help='Optional argument - Only output the URLs to the console/stdout to support bash piping. This mode already defaults to true if verbose is not set although can be explicitly defined.')
     parser.add_argument('-g', "--graph", dest='graph', action='store_true', help='Experimental optional argument - Output the information into a html graph file to the output directory. This functionality is implemented but needs to be tuned and enhanced. Future intent would be to provide an interactive file to explore and visualize patterns, scope status, and program correlations. It is also currently slow to generate.')
+    parser.add_argument('-b', "--bulk", dest='bulk', help = "Optional argument - Generate a bulk scope file from a supported Bug Bounty platform. Valid platform values: bugcrowd, hackerone, intigriti, yeswehack, federacy, hackenproof")
     # Read arguments from command line
     args = parser.parse_args()
     
@@ -50,27 +51,6 @@ def main():
     if quietMode is False:
         showBanner()
 
-    # Check if scope is provided
-    if args.scope is None:
-        if quietMode is False:
-            print("Scope input file is required.")
-        quit()
-    else:
-        scopeFile = Path(args.scope)
-        #if not os.path.exists(scopeFile):
-        if not scopeFile.exists():
-            if quietMode is False:
-                print("Scope file does not exist.")
-            quit()
-        else:
-            if quietMode is False:
-                print("Loading program scope file.")
-            try:
-                programScope = goodfaith.core.scope.loadScope(scopeFile)
-            except:
-                if quietMode is False:
-                    print('Failed to load project scope.')
-                quit()
 
     # Validate output directory
     if args.outputdir:
@@ -85,33 +65,82 @@ def main():
                     print('Failed to create output directory.')
     else:
         outputDir = 'NoOutput'
-
-    # Check if there is any bash pipe input
-    if not sys.stdin.isatty():
-        try:
-            dfAllURLs = pd.read_csv(sys.stdin, header=None, names=['url'], engine='python')
-        except:
+    
+    if args.bulk is None:
+        # Check if scope is provided
+        if args.scope is None:
             if quietMode is False:
-                print('Failed to load standard input.')
-        #for line in sys.stdin:
-        #    sys.stdout.write(line)
-    else:
-        if args.inputfile is not None:
-            inputFile = Path(args.inputfile)
-            if not inputFile.exists():
-                print("Input file does not exist.")
+                print("Scope input file is required.")
+            quit()
+        else:
+            scopeFile = Path(args.scope)
+            #if not os.path.exists(scopeFile):
+            if not scopeFile.exists():
+                if quietMode is False:
+                    print("Scope file does not exist.")
                 quit()
             else:
+                if quietMode is False:
+                    print("Loading program scope file.")
                 try:
-                    dfAllURLs = pd.read_csv(inputFile, header=None, names=['url'], engine='python')
+                    programScope = goodfaith.core.scope.loadScope(scopeFile)
                 except:
-                    if not (quietMode):
-                        print('Input file failed to load.')
+                    if quietMode is False:
+                        print('Failed to load project scope.')
                     quit()
+
+        # Check if there is any bash pipe input
+        if not sys.stdin.isatty():
+            try:
+                dfAllURLs = pd.read_csv(sys.stdin, header=None, names=['url'], engine='python')
+            except:
+                if quietMode is False:
+                    print('Failed to load standard input.')
+            #for line in sys.stdin:
+            #    sys.stdout.write(line)
+        else:
+            if args.inputfile is not None:
+                inputFile = Path(args.inputfile)
+                if not inputFile.exists():
+                    print("Input file does not exist.")
+                    quit()
+                else:
+                    try:
+                        dfAllURLs = pd.read_csv(inputFile, header=None, names=['url'], engine='python')
+                    except:
+                        if not (quietMode):
+                            print('Input file failed to load.')
+                        quit()
     
-    dfUpdatedURLs = goodfaith.core.scope.boundaryGuard(dfAllURLs, outputDir, programScope, quietMode)
-    if quietMode is False:
-        print('Scope processing completed.')
+    else:
+        if args.bulk is not None:
+            platformList = ['bugcrowd', 'hackerone', 'intigriti', 'yeswehack', 'federacy', 'hackenproof']
+            if (args.bulk in platformList):
+                platformName = args.bulk
+            else:
+                if quietMode is False:
+                    print('Invalid platform name.')
+                quit()
+        
+            try:
+                platformScope, programStats = goodfaith.core.scope.bulkLoad(platformName)
+                filePath = outputDir + platformName + '_programs.json'
+                with open(filePath, 'w', encoding='utf-8') as f:
+                    json.dump(platformScope, f, ensure_ascii=False, indent=4)
+                if quietMode is False:
+                    print('There were ' + str(programStats) + ' programs bulk processed.')
+                quit()
+            except:
+                if quietMode is False:
+                    print('Error loading, processing, or writing bulk file.')
+                quit()
+    
+    if (scopeFile is not None):
+        dfUpdatedURLs = goodfaith.core.scope.boundaryGuard(dfAllURLs, outputDir, programScope, quietMode)
+        if quietMode is False:
+            print('Scope processing completed.')
+    else:
+        quit()
     
     # Need to run graph after data analysis
     if args.graph is True:
