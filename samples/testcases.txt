@@ -1,0 +1,16 @@
+
+
+# This test should successfully process URLs from stdin.
+echo https://www.brevityinmotion.com | goodfaith -v -d -s samples/scope.json
+
+# This test should successfully process URLs from sample scope file.
+goodfaith -v -d -s samples/scope.json -i samples/brevityinmotion-urls-max.txt -o output
+
+# This test should fail scope loading.
+goodfaith -v -d -s samples/scope.json -i samples/filedoesnotexist.txt -o output
+
+# This test should fail output directory creation
+goodfaith -v -d -s samples/scope.json -i samples/brevityinmotion-urls-max2.txt -o /output
+
+# This test should successfully process multiple URLs from stdin.
+cat samples/brevityinmotion-urls-max.txt | goodfaith -s samples/scope.json
