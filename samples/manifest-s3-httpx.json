@@ -1,0 +1,10 @@
+{
+    "fileLocations": [{
+        "URIPrefixes": [
+            "s3://brevity-dashboard/data/"
+        ]
+    }],
+    "globalUploadSettings": {
+        "format": "JSON"
+    }
+}
