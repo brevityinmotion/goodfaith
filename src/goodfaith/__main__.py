@@ -131,7 +131,7 @@ def main():
     if args.scope:
         if (scopeFile is not None):
             try:
-                dfUpdatedURLs = goodfaith.core.scope.boundaryGuard(dfAllURLs, outputDir, programScope, quietMode)
+                dfUpdatedURLs = goodfaith.core.scope.boundaryGuard(dfAllURLs, outputDir, programScope, quietMode, debugMode)
                 if quietMode is False:
                     print('Scope processing completed.')
             except:

@@ -48,6 +48,10 @@ Example usage with stdin and bash piping:
 
 `cat urls.txt | goodfaith -s scopefile.json | httpx`
 
+Example bulk import:
+
+`goodfaith -b bugcrowd -o output`
+
 __Required arguments__:
 * __-s, --scope__ : A JSON formatted scope file is required in order to process the urls. This argument requires the path and filename.
 
@@ -76,6 +80,7 @@ __Optional arguments__:
 * __-o, --outputdir__ : The location of the output directory. If the folder does not already exist, it will be created. If no output directory is provided, no output files will be generated and the only output will be printed to the console via stdout.
 * __-v, --verbose__ : Output additional details to the console (statistics, errors, and progress). This mode should not be used if passing the stdout to another tool and is best utilized for troubleshooting.
 * __-q, --quiet__ : Only output the URLs to the console/stdout to support bash piping. This mode already defaults to true if verbose is not set although can be explicitly defined.
+* __-b, --bulk__ : Generate bulk scope files for public programs from major platforms. Valid platforms include: [hackerone, bugcrowd, intigriti, yeswehack, federacy, hackenproof]. The data is generated from the amazing bounty targets project (https://github.com/arkadiyt/bounty-targets-data) by Arkadiy Tetelman!
 
 __Experimental arguments__:
 * __-g, --graph__ : Output the information into a html graph file to the output directory. This functionality is implemented but needs to be tuned and enhanced. Future intent would be to provide an interactive file to explore and visualize patterns, scope status, and program correlations. It is also currently slow to generate.
