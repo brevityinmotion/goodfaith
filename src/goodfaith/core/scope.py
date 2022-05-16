@@ -340,23 +340,33 @@ def bulkLoad(bulkPlatform):
     with urllib.request.urlopen(filePath) as url:
         data = json.loads(url.read().decode())
 
+    # These functions normalize the program names 
+    def parseProgramUrl(programUrl):
+        programName = programUrl.rsplit('/', 1)[-1]
+        programName = ''.join(e for e in programName if e.isalnum())
+        return programName
+
+    def parseProgramName(programName):
+        programName = ''.join(e for e in programName if e.isalnum())
+        return programName
+
     # Count the scopes processed
     counter = 0
     for scope in data:
         counter = counter + 1
         # Normalize the JSON keys
         if (bulkPlatform == 'bugcrowd'):
-            scope['program'] = scope['name']
+            scope['program'] = parseProgramUrl(scope['url'])
         if (bulkPlatform == 'hackerone'):
-            scope['program'] = scope['handle']
+            scope['program'] = parseProgramName(scope['handle'])
         if (bulkPlatform == 'intigriti'):
-            scope['program'] = scope['company_handle']
+            scope['program'] = parseProgramName(scope['company_handle'])
         if (bulkPlatform == 'yeswehack'):
-            scope['program'] = scope['name']
+            scope['program'] = parseProgramName(scope['id'])
         if (bulkPlatform == 'federacy'):
-            scope['program'] = scope['name']
+            scope['program'] = parseProgramUrl(scope['url'])
         if (bulkPlatform == 'hackenproof'):
-            scope['program'] = scope['name']
+            scope['program'] = parseProgramUrl(scope['url'])
 
     dfPublicPrograms = pd.json_normalize(data)
     dfPublicPrograms['platform'] = bulkPlatform
