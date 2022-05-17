@@ -119,7 +119,8 @@ def boundaryGuard(dfAllURLs, outputDir, programScope, quietMode, debugMode, outp
     
             # Create DataFrames containing sorted URLs
             dfURLsIn = dfAllURLs[(dfAllURLs['scope'] == 'in') | (dfAllURLs['scope'] == 'wild')]
-            dfURLsMod = dfAllURLs[dfAllURLs['scope'] != 'out']
+            dfURLsMod = dfAllURLs[dfAllURLs['scope'] == 'other']
+#            dfURLsMod = dfAllURLs[(dfAllURLs['scope'] != 'out') | (dfAllURLs['scope'] != 'in') | (dfAllURLs['scope'] != 'wild')]
             dfURLsOut = dfAllURLs[dfAllURLs['scope'] == 'out']
     
             if (outputDir != 'NoOutput'):
@@ -140,7 +141,7 @@ def boundaryGuard(dfAllURLs, outputDir, programScope, quietMode, debugMode, outp
                     with open(statsFile, "a") as file_object:
                         file_object.write('Total number of urls: ' + str(len(dfAllURLs['url'].drop_duplicates())))
                         file_object.write('\n')
-                        file_object.write('Number of urls not explicitly out-of-scope: ' + str(len(dfURLsMod['url'].drop_duplicates())))
+                        file_object.write('Number of urls not in scope but not explicitly out-of-scope: ' + str(len(dfURLsMod['url'].drop_duplicates())))
                         file_object.write('\n')
                         file_object.write('Number of urls in-scope: ' + str(len(dfURLsIn['url'].drop_duplicates())))
                         file_object.write('\n')
