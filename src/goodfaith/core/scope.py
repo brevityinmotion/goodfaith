@@ -98,7 +98,7 @@ def processEnrichURLs(programScope, dfAllURLs): # dataframe requires domain colu
     dfAllURLs['scope'] = np.select(conditions, values)
     return dfAllURLs
 
-def boundaryGuard(dfAllURLs, outputDir, programScope, quietMode, debugMode):
+def boundaryGuard(dfAllURLs, outputDir, programScope, quietMode, debugMode, outputType):
     
     for item in programScope:
         try:
@@ -112,6 +112,7 @@ def boundaryGuard(dfAllURLs, outputDir, programScope, quietMode, debugMode):
             storeInPathUrl = outputDir + programName + '-urls-in-full.txt'
             # File path that only contains explicitly in-scope urls
             storeBasePathUrl = outputDir + programName + '-urls-in-base.txt'
+            storeInDomains = outputDir + programName + '-domains-in.txt'
             storeOutPathUrl = outputDir + programName + '-urls-out.txt'
             detailedURLOutput = outputDir + programName + '-details.csv'
             statsFile = outputDir + programName + '-stats.txt'
@@ -126,10 +127,13 @@ def boundaryGuard(dfAllURLs, outputDir, programScope, quietMode, debugMode):
                 dfURLsIn['url'].drop_duplicates().to_csv(storeInPathUrl, header=None, index=False, sep='\n')
                 # This only outputs the base URL so that it can be used for fuzzing
                 dfURLsIn['baseurl'].drop_duplicates().to_csv(storeBasePathUrl, header=None, index=False, sep='\n')
+                # Output domains that are in-scope
+                dfURLsIn['domain'].drop_duplicates().to_csv(storeInDomains, header=None, index=False, sep='\n')
                 # Output URLs that are not explicitly out-of-scope
                 dfURLsMod['url'].drop_duplicates().to_csv(storeModPathUrl, header=None, index=False, sep='\n')
                 # Output URLs that are explicitly out-of-scope
                 dfURLsOut['url'].drop_duplicates().to_csv(storeOutPathUrl, header=None, index=False, sep='\n')
+                # Output detailed summary file
                 dfAllURLs.to_csv(detailedURLOutput, columns=['url','domain','baseurl','program','scope'], index=False)
 
                 try:
@@ -148,9 +152,19 @@ def boundaryGuard(dfAllURLs, outputDir, programScope, quietMode, debugMode):
                     if quietMode is False:
                         print('Failed to write stats file.')
     
-            # Output the URLs to console/stdout
-            dfURLsIn['url'].drop_duplicates().to_csv(sys.stdout, header=None, index=False, sep='\n')
-    
+            if (outputType == 'full_url'):
+                # Output the full URLs to console/stdout
+                dfURLsIn['url'].drop_duplicates().to_csv(sys.stdout, header=None, index=False, sep='\n')
+            elif (outputType == 'base_url'):
+                # Output the base URLs to console/stdout
+                dfURLsIn['baseurl'].drop_duplicates().to_csv(sys.stdout, header=None, index=False, sep='\n')
+            elif (outputType == 'domain'):
+                # Output the domains to console/stdout
+                dfURLsIn['domain'].drop_duplicates().to_csv(sys.stdout, header=None, index=False, sep='\n')
+            else:
+                # This code should never hit due to prior data validation, but just in case, default to full URLs.
+                dfURLsIn['url'].drop_duplicates().to_csv(sys.stdout, header=None, index=False, sep='\n')
+            
             if quietMode is False:
                 # Output metrics within console
                 print('\n')

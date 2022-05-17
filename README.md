@@ -29,6 +29,7 @@ This tool solves these major barriers towards scalable automation via the follow
 * goodfaith can be imported into an existing project or utilized as a standalone bash script.
 * goodfaith can be chained into bug bounty one-liners to maintain scope throughout a workflow.
 * goodfaith removes explicitly out-of-scope targets from a workflow.
+* goodfaith can take URLs as input and output a unique list of full URLs, base URLs, or domains.
 
 ### Installation
 
@@ -57,19 +58,21 @@ __Required arguments__:
 
 Input file format:
 ```
-{
-  "program": "brevityinmotion",
-  "in_scope": [
-    "*.brevityinmotion.com",
-    "securitymarker.io",
-    "https://www.github.com/brevityinmotion"
-  ],
-  "out_of_scope": [
-    "icicles.io"
-  ],
-  "platform": "External",
-  "invite": "private"
-}
+[
+  {
+    "program": "brevityinmotion",
+    "in_scope": [
+      "*.brevityinmotion.com",
+      "securitymarker.io",
+      "https://www.github.com/brevityinmotion"
+    ],
+    "out_of_scope": [
+      "icicles.io"
+    ],
+    "platform": "External",
+    "invite": "private"
+  }
+]
 ```
 
 The JSON scope input file must contain the 'program', 'in_scope', and 'out_of_scope' keys and values. An example file can also be refereced at <https://github.com/brevityinmotion/goodfaith/blob/main/samples/scope.json>.
@@ -78,6 +81,7 @@ __Optional arguments__:
 * __-h, --help__ : Provides syntax information for usage.
 * __-i, --inputfile__ : The location and filename of the URL input file. Only use this argument when not passing URLs as stdin. 
 * __-o, --outputdir__ : The location of the output directory. If the folder does not already exist, it will be created. If no output directory is provided, no output files will be generated and the only output will be printed to the console via stdout.
+* __-t, --type__ : The type of output to stdout for further processing. Valid output type values are: full_url, base_url, or domain. - If argument is undefined, it will default to full URLs.")
 * __-v, --verbose__ : Output additional details to the console (statistics, errors, and progress). This mode should not be used if passing the stdout to another tool and is best utilized for troubleshooting.
 * __-q, --quiet__ : Only output the URLs to the console/stdout to support bash piping. This mode already defaults to true if verbose is not set although can be explicitly defined.
 * __-b, --bulk__ : Generate bulk scope files for public programs from major platforms. Valid platforms include: [hackerone, bugcrowd, intigriti, yeswehack, federacy, hackenproof]. The data is generated from the amazing bounty targets project (https://github.com/arkadiyt/bounty-targets-data) by Arkadiy Tetelman!
@@ -107,6 +111,7 @@ __Note__ - when using console mode or bash pipes, __the in_scope and wild URLs a
 * {output folder path}/{program}-urls-other.txt - This file includes the urls not explicitly in or out of scope.
 * {output folder path}/{program}-urls-in-full.txt - This file includes the full URL for in-scope URLs.
 * {output folder path}/{program}-urls-in-base.txt - This file includes the base URL for in-scope URLs. The base path is useful for brute-forcing varying directory paths without the parameters.
+* {output folder path}/{program}-domains-in.txt - This file includes the domains for in-scope URLs. 
 * {output folder path}/{program}-urls-out.txt - This file includes the out-of-scope URLs.
 * {output folder path}/{program}-details.csv - This csv file includes all of the parsed and scope status data and can be beneficial for further analysis, searching, and filtering.
 * {output folder path}/{program}-stats.txt - This file provides an output summary of the processing statistics.

@@ -14,3 +14,25 @@ goodfaith -v -d -s samples/scope.json -i samples/brevityinmotion-urls-max2.txt -
 
 # This test should successfully process multiple URLs from stdin.
 cat samples/brevityinmotion-urls-max.txt | goodfaith -s samples/scope.json
+
+
+# Tests for output type:
+goodfaith -v -d -s samples/scope.json -i samples/brevityinmotion-urls-max.txt -o output -t full_url
+goodfaith -v -d -s samples/scope.json -i samples/brevityinmotion-urls-max.txt -o output -t base_url
+goodfaith -v -d -s samples/scope.json -i samples/brevityinmotion-urls-max.txt -o output -t domain
+goodfaith -v -d -s samples/scope.json -i samples/brevityinmotion-urls-max.txt -o output -t lkjlkj
+
+# Bulk load tests
+goodfaith -v -d -b bugcrowd - output
+goodfaith -v -d -b hackerone -o output
+goodfaith -v -d -b federacy -o output
+goodfaith -v -d -b intigriti -o output
+
+# This should fail due to invalid platform
+goodfaith -v -d -b asdf -o output2
+
+# This should do both bulk processing and URL processing
+cat samples/brevityinmotion-urls-max.txt | goodfaith -s samples/scope.json -o output -b intigriti
+
+# Test processing through large scope file
+cat samples/brevityinmotion-urls-max.txt | goodfaith -s output/intigriti_programs.json -o output

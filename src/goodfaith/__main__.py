@@ -22,6 +22,7 @@ parser = argparse.ArgumentParser(
 parser.add_argument("-s", "--scope", help="Required argument - A JSON formatted scope file is required in order to process the urls. This argument requires the path and filename.")
 parser.add_argument("-i", "--inputfile", dest='inputfile', help="Optional argument - The location and filename of the URL input file.")
 parser.add_argument("-o", "--outputdir", dest='outputdir', help="Optional argument - The location of the output directory. If the folder does not already exist, it will be created. If no output directory is provided, no output files will be generated and the only output will be printed to the console via stdout.")
+parser.add_argument("-t", "--type", dest='outputtype', help="Optional argument - The type of output to stdout for further processing. Valid output type values are: full_url, base_url, or domain. - If argument is undefined, it will default to full URLs.")
 parser.add_argument("-c", "--config", help="The parameters will be supported in the future via a config file to limit argument inputs.")
 parser.add_argument("-v", "--verbose", dest='quiet', action='store_false', help="Optional argument - Output additional details to the console (statistics, errors, and progress). This mode should not be used if passing the stdout to another tool and is best utilized for troubleshooting.")
 parser.add_argument('-q', "--quiet", dest='quiet', action='store_true', help='Optional argument - Only output the URLs to the console/stdout to support bash piping. This mode already defaults to true if verbose is not set although can be explicitly defined.')
@@ -79,6 +80,20 @@ def main():
     else:
         outputDir = 'NoOutput'
     
+    # Validate the output type argument
+    if args.outputtype:
+        if (args.outputtype == 'full_url'):
+            outputType = 'full_url'
+        elif (args.outputtype == 'base_url'):
+            outputType = 'base_url'
+        elif (args.outputtype == 'domain'):
+            outputType = 'domain'
+        else:
+            outputType = 'full_url'
+    else:
+        outputType = 'full_url'
+
+    
     # SCOPE LOAD
     if args.scope:
         try:
@@ -131,7 +146,7 @@ def main():
     if args.scope:
         if (scopeFile is not None):
             try:
-                dfUpdatedURLs = goodfaith.core.scope.boundaryGuard(dfAllURLs, outputDir, programScope, quietMode, debugMode)
+                dfUpdatedURLs = goodfaith.core.scope.boundaryGuard(dfAllURLs, outputDir, programScope, quietMode, debugMode, outputType)
                 if quietMode is False:
                     print('Scope processing completed.')
             except:
