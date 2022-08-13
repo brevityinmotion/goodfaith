@@ -124,18 +124,22 @@ def boundaryGuard(dfAllURLs, outputDir, programScope, quietMode, debugMode, outp
             dfURLsOut = dfAllURLs[dfAllURLs['scope'] == 'out']
     
             if (outputDir != 'NoOutput'):
-                # Output URLs that are in-scope
-                dfURLsIn['url'].drop_duplicates().to_csv(storeInPathUrl, header=None, index=False, sep='\n')
-                # This only outputs the base URL so that it can be used for fuzzing
-                dfURLsIn['baseurl'].drop_duplicates().to_csv(storeBasePathUrl, header=None, index=False, sep='\n')
-                # Output domains that are in-scope
-                dfURLsIn['domain'].drop_duplicates().to_csv(storeInDomains, header=None, index=False, sep='\n')
-                # Output URLs that are not explicitly out-of-scope
-                dfURLsMod['url'].drop_duplicates().to_csv(storeModPathUrl, header=None, index=False, sep='\n')
-                # Output URLs that are explicitly out-of-scope
-                dfURLsOut['url'].drop_duplicates().to_csv(storeOutPathUrl, header=None, index=False, sep='\n')
-                # Output detailed summary file
-                dfAllURLs.to_csv(detailedURLOutput, columns=['url','domain','baseurl','program','scope'], index=False)
+                if (len(dfURLsIn.index) > 0):
+                    # Output URLs that are in-scope
+                    dfURLsIn['url'].drop_duplicates().to_csv(storeInPathUrl, header=None, index=False, sep='\n')
+                    # This only outputs the base URL so that it can be used for fuzzing
+                    dfURLsIn['baseurl'].drop_duplicates().to_csv(storeBasePathUrl, header=None, index=False, sep='\n')
+                    # Output domains that are in-scope
+                    dfURLsIn['domain'].drop_duplicates().to_csv(storeInDomains, header=None, index=False, sep='\n')
+                if (len(dfURLsMod.index) > 0):
+                    # Output URLs that are not explicitly out-of-scope
+                    dfURLsMod['url'].drop_duplicates().to_csv(storeModPathUrl, header=None, index=False, sep='\n')
+                if (len(dfURLsOut.index) > 0):
+                    # Output URLs that are explicitly out-of-scope
+                    dfURLsOut['url'].drop_duplicates().to_csv(storeOutPathUrl, header=None, index=False, sep='\n')
+                if (len(dfAllURLs.index) > 0):
+                    # Output detailed summary file
+                    dfAllURLs.to_csv(detailedURLOutput, columns=['url','domain','baseurl','program','scope'], index=False)
 
                 try:
                     with open(statsFile, "a") as file_object:
@@ -241,13 +245,20 @@ def cleanupScopeWild(dfIn):
     matchString = '\*.'
     matches = []
     for match in dfIn:
-        match = re.search("(?P<url>[*][^\s|\,]+)", match)
+        
+        # There was a bug in the regex where it was dropping anything prior to the asterisk so it has been updated. A wildcard match must now begin with a wildcard.
+        # TODO: Add functionality to include wildcards in the middle of strings.
+        # Old version: (?P<url>[*][^\s|\,]+)
+        
+        match = re.search("(?P<url>^[*][^\s|\,]+)", match)
    
         if match is None:
             continue
         else:
             match = match.group('url')
-            matches.append(match)
+            if (match != '*.'):
+                # This check is to fix an issue for program mistakes where it has '*. domain.com'. The space in there causes the search to be *. which will include all URLs.
+                matches.append(match)
     return matches
 
 def cleanupScopeIP(dfIn):

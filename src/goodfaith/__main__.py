@@ -19,7 +19,7 @@ parser = argparse.ArgumentParser(
     epilog='hack with goodfaith')
  
 # Adding optional argument
-parser.add_argument("-s", "--scope", help="Required argument - A JSON formatted scope file is required in order to process the urls. This argument requires the path and filename.")
+parser.add_argument("-s", "--scope", help="Required argument - A JSON formatted scope file is required in order to process the urls. This argument requires the path and filename. Alternatively, this argument can accept a bug bounty platform name if you want to compare against all of the public scopes. Valid platforms include: [hackerone, bugcrowd, intigriti, yeswehack, federacy, hackenproof] - (i.e. -s bugcrowd).")
 parser.add_argument("-i", "--inputfile", dest='inputfile', help="Optional argument - The location and filename of the URL input file.")
 parser.add_argument("-o", "--outputdir", dest='outputdir', help="Optional argument - The location of the output directory. If the folder does not already exist, it will be created. If no output directory is provided, no output files will be generated and the only output will be printed to the console via stdout.")
 parser.add_argument("-t", "--type", dest='outputtype', help="Optional argument - The type of output to stdout for further processing. Valid output type values are: full_url, base_url, or domain. - If argument is undefined, it will default to full URLs.")
@@ -93,30 +93,35 @@ def main():
     else:
         outputType = 'full_url'
 
-    
     # SCOPE LOAD
     if args.scope:
         try:
-            scopeFile = Path(args.scope)
-            #if not os.path.exists(scopeFile):
-            if not scopeFile.exists():
-                if quietMode is False:
-                    print("Scope file does not exist.")
-                quitProgram()
+            platformList = ['bugcrowd', 'hackerone', 'intigriti', 'yeswehack', 'federacy', 'hackenproof']
+            if (args.scope in platformList):
+                scopeFile = args.scope
+                programScope, programStats = goodfaith.core.scope.bulkLoad(scopeFile)
             else:
-                if quietMode is False:
-                    print("Loading program scope file.")
-                try:
-                    programScope = goodfaith.core.scope.loadScope(scopeFile)
-                except:
+                scopeFile = Path(args.scope)
+                #if not os.path.exists(scopeFile):
+                if not scopeFile.exists():
                     if quietMode is False:
-                        print('Failed to load project scope.')
-                        if debugMode is True:
-                            print(traceback.format_exc())
-                    sys.exit()
+                        print("Scope file does not exist.")
+                    quitProgram()
+                else:
+                    if quietMode is False:
+                        print("Loading program scope file.")
+                    try:
+                        programScope = goodfaith.core.scope.loadScope(scopeFile)
+                    except:
+                        if quietMode is False:
+                            print('Failed to load project scope.')
+                            if debugMode is True:
+                                print(traceback.format_exc())
+                        sys.exit()
         except:
             if quietMode is False:
-                print('Scope file failed.')
+                print('Scope load failed.')
+       
         
     # BASH INPUT PROCESS
     if not sys.stdin.isatty():

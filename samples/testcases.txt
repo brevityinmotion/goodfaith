@@ -6,6 +6,9 @@ echo https://www.brevityinmotion.com | goodfaith -v -d -s samples/scope.json
 # This test should successfully process URLs from sample scope file.
 goodfaith -v -d -s samples/scope.json -i samples/brevityinmotion-urls-max.txt -o output
 
+# This test should successfully process URLs from platform scope file.
+goodfaith -v -d -s bugcrowd -i samples/brevityinmotion-urls-max.txt -o output
+
 # This test should fail scope loading.
 goodfaith -v -d -s samples/scope.json -i samples/filedoesnotexist.txt -o output
 

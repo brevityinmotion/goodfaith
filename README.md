@@ -49,12 +49,14 @@ Example usage with stdin and bash piping:
 
 `cat urls.txt | goodfaith -s scopefile.json | httpx`
 
+`cat urls.txt | goodfaith -s bugcrowd | httpx`
+
 Example bulk import:
 
 `goodfaith -b bugcrowd -o output`
 
 __Required arguments__:
-* __-s, --scope__ : A JSON formatted scope file is required in order to process the urls. This argument requires the path and filename.
+* __-s, --scope__ : A JSON formatted scope file is required in order to process the urls. The scope file requires the path and filename (i.e. -s /home/user/scope.json). Alternatively, this argument can accept a bug bounty platform name if you want to compare against all of the public scopes. Valid platforms include: [hackerone, bugcrowd, intigriti, yeswehack, federacy, hackenproof] - (i.e. -s bugcrowd).
 
 Input file format:
 ```
