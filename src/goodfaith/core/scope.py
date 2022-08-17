@@ -74,24 +74,33 @@ def processEnrichURLs(programScope, dfAllURLs): # dataframe requires domain colu
     dfAllURLs['scopeIn'] = dfAllURLs.domain.str.lower().isin([x.lower() for x in ScopeInGeneral]).map(mapperIn)
     
     # This section checks for wildcard scopes and determines whether a url is included within the wildcard scope
-    lstWild = []
+    lstWildIn = []
     for wild in ScopeInWild:
         wild = re.sub(r'^.*?\*\.', '', wild)
-        lstWild.append(wild.lower())
+        lstWildIn.append(wild.lower())
         #print(wild)
     
-    dfAllURLs['scopeWild'] = dfAllURLs.domain.str.lower().str.endswith(tuple(lstWild)).map(mapperWild)
+    dfAllURLs['scopeInWild'] = dfAllURLs.domain.str.lower().str.endswith(tuple(lstWildIn)).map(mapperWild)
+    
+    # This section checks for wildcard scopes and determines whether a url is included within the wildcard scope
+    lstWildOut = []
+    for wild in ScopeOutWild:
+        wild = re.sub(r'^.*?\*\.', '', wild)
+        lstWildOut.append(wild.lower())
+
+    dfAllURLs['scopeOutWild'] = dfAllURLs.domain.str.lower().str.endswith(tuple(lstWildOut)).map(mapperOut)
     
     # This section creates a normalized scope field to track in, out, wild, or other
     conditions = [
         (dfAllURLs['scopeOut'] == 'out'),
-        (dfAllURLs['scopeIn'] == 'in') & (dfAllURLs['scopeOut'] != 'out'),
-        (dfAllURLs['scopeWild'] == 'wild') & (dfAllURLs['scopeIn'] != 'in') & (dfAllURLs['scopeOut'] != 'out'),
-        (dfAllURLs['scopeIn'] == 'other') & (dfAllURLs['scopeWild'] != 'wild') & (dfAllURLs['scopeIn'] != 'in') & (dfAllURLs['scopeOut'] != 'out')
+        (dfAllURLs['scopeOutWild'] == 'out'),
+        (dfAllURLs['scopeIn'] == 'in') & (dfAllURLs['scopeOut'] != 'out') & (dfAllURLs['scopeOutWild'] != 'out'),
+        (dfAllURLs['scopeInWild'] == 'wild') & (dfAllURLs['scopeIn'] != 'in') & (dfAllURLs['scopeOut'] != 'out') & (dfAllURLs['scopeOutWild'] != 'out'),
+        (dfAllURLs['scopeIn'] == 'other') & (dfAllURLs['scopeInWild'] != 'wild') & (dfAllURLs['scopeIn'] != 'in') & (dfAllURLs['scopeOut'] != 'out') & (dfAllURLs['scopeOutWild'] != 'out')
     ]
     
     # Each of these values maps to the equivalent condition listed
-    values = ['out', 'in', 'wild', 'other']                                                                           
+    values = ['out', 'out', 'in', 'wild', 'other']                                                                           
     
     # Create a new column and assign the values specific to the conditions.
     # TODO - This could potentially miss items since it is a select. Need to perform some searches on whether or not scope column is populated after using this for a while.
@@ -340,12 +349,18 @@ def parseScope(inputScope):
                 targetData.append(item.get('target'))
             if item.get('asset_identifier') is not None:
                 targetData.append(item.get('asset_identifier'))
+            # Intigriti file references JSON element as endpoint
+            if item.get('endpoint') is not None:
+                targetData.append(item.get('endpoint'))
         return targetData
     else:
         if smallData.get('target') is not None:
             targetData.append(smallData.get('target'))
         if smallData.get('asset_identifier') is not None:
             targetData.append(smallData.get('asset_identifier'))
+        # Intigriti file references JSON element as endpoint
+        if smallData.get('endpoint') is not None:
+            targetData.append(smallData.get('endpoint'))
         return targetData
 
 # Retrieve Bulk Programs
